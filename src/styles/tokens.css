@@ -66,7 +66,9 @@
     --surface-2: #142029;
     --ink: #0b1219;
     --text: #e6eff8;
-    --text-muted: #92a6b8;
+    /* Bright enough to read comfortably on dark cards, still clearly
+       secondary next to --text. The old #92a6b8 was too dim. */
+    --text-muted: #b3c6d8;
     --accent: #6fb0e6;
     --accent-contrast: #0b1219;
     --gold: #f0c357;
