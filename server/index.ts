@@ -17,6 +17,11 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY;
 const PORT = Number(process.env.API_PORT ?? 8787);
 const ELEVEN_MODEL = process.env.ELEVENLABS_MODEL ?? "eleven_multilingual_v2";
+// If a requested voice does not exist on this account (ElevenLabs has been
+// retiring its old default voices), retry with this known-good voice instead
+// of failing. George is part of the current lineup and used by the English module.
+const ELEVEN_FALLBACK_VOICE =
+  process.env.ELEVENLABS_FALLBACK_VOICE ?? "JBFqnCBsd6RMkjVDRZzb";
 
 // Models: override via env if you want a different one.
 const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL ?? "gemini-2.5-flash";
@@ -160,44 +165,81 @@ app.post("/api/audio/tts", async (req, res) => {
   if (!text || !voiceId)
     return res.status(400).json({ error: "Missing 'text' or 'voiceId'." });
 
-  // Expressive default (good for dramatic reading); callers can override, e.g.
-  // maths sends clearer, steadier settings for accurate narration.
+  // Expressive, natural default (good for dramatic reading); callers can
+  // override, e.g. maths sends slightly steadier settings for accuracy.
+  // Lower stability and a bit more style keeps the read lively, not robotic.
   const settings = voiceSettings ?? {
-    stability: 0.4,
-    similarity_boost: 0.85,
-    style: 0.3,
+    stability: 0.35,
+    similarity_boost: 0.8,
+    style: 0.4,
     use_speaker_boost: true,
   };
 
-  try {
-    const r = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": ELEVEN_KEY!,
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
-        },
-        body: JSON.stringify({
-          text,
-          model_id: ELEVEN_MODEL,
-          voice_settings: settings,
-        }),
+  // Lesson narration is fixed text, so cache generated audio. Replaying an
+  // extract or explanation then costs zero ElevenLabs credits.
+  const cacheKey = `${voiceId}|${ELEVEN_MODEL}|${JSON.stringify(settings)}|${text}`;
+  const cached = ttsCache.get(cacheKey);
+  if (cached) {
+    res.setHeader("Content-Type", "audio/mpeg");
+    return res.send(cached);
+  }
+
+  const requestTts = (voice: string) =>
+    fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+      method: "POST",
+      headers: {
+        "xi-api-key": ELEVEN_KEY!,
+        "Content-Type": "application/json",
+        Accept: "audio/mpeg",
       },
-    );
+      body: JSON.stringify({
+        text,
+        model_id: ELEVEN_MODEL,
+        voice_settings: settings,
+      }),
+    });
+
+  try {
+    let r = await requestTts(voiceId);
+    // A 404 means the voice does not exist on this account (ElevenLabs has
+    // retired its legacy default voices). Retry once with the fallback voice
+    // so narration keeps working rather than silently failing.
+    if (r.status === 404 && voiceId !== ELEVEN_FALLBACK_VOICE) {
+      console.warn(
+        `Voice ${voiceId} not found on this ElevenLabs account; using fallback voice.`,
+      );
+      r = await requestTts(ELEVEN_FALLBACK_VOICE);
+    }
     if (!r.ok) {
+      const details = await readErrorBody(r);
+      // 402 means the account's character allowance has run out.
+      const guidance =
+        r.status === 402
+          ? "The ElevenLabs character allowance has run out. Top up or upgrade at elevenlabs.io, or set ELEVENLABS_MODEL=eleven_flash_v2_5 in .env to halve credit usage."
+          : undefined;
       return res
         .status(r.status)
-        .json({ error: "ElevenLabs request failed.", details: await readErrorBody(r) });
+        .json({ error: "ElevenLabs request failed.", details, ...(guidance ? { guidance } : {}) });
     }
     const buf = Buffer.from(await r.arrayBuffer());
+    rememberTts(cacheKey, buf);
     res.setHeader("Content-Type", "audio/mpeg");
     res.send(buf);
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
 });
+
+// Small in-memory audio cache (newest ~40 clips). Lesson text is static, so
+// this saves real money: each replay would otherwise bill the same characters.
+const ttsCache = new Map<string, Buffer>();
+function rememberTts(key: string, buf: Buffer) {
+  if (ttsCache.size >= 40) {
+    const oldest = ttsCache.keys().next().value;
+    if (oldest) ttsCache.delete(oldest);
+  }
+  ttsCache.set(key, buf);
+}
 
 /*
  * A fresh educational / motivational quote. No key needed. The frontend already

@@ -6,12 +6,17 @@ import { apiUrl } from "@/shared/api/apiUrl";
  */
 
 /** A few named voices so modules can pick a tone without knowing voice IDs.
- * Replace the IDs with real ones from your ElevenLabs account. */
+ *
+ * IMPORTANT: only use voices from ElevenLabs' CURRENT lineup. The old legacy
+ * voices (Rachel 21m00Tcm4TlvDq8ikWAM, Antoni ErXwobaYiN019PkySvjV, etc.) have
+ * been deprecated and return voice_not_found on newer accounts, which is why
+ * narration silently failed for some modules. If a voice is still missing on
+ * your account, the server falls back to a known-good default voice. */
 export const VOICES = {
-  narrator: "21m00Tcm4TlvDq8ikWAM", // calm default (Rachel)
-  warm: "EXAVITQu4vr4xnSDxMaL", // softer, reassuring
-  dramatic: "ErXwobaYiN019PkySvjV", // for literature read-alouds
-  historical: "JBFqnCBsd6RMkjVDRZzb", // deep, warm British storyteller (George)
+  narrator: "Xb7hH8MSUJpSbSDYk0k2", // Alice: clear, confident British
+  warm: "EXAVITQu4vr4xnSDxMaL", // Sarah: soft, reassuring
+  dramatic: "onwK4e9ZLuTAKqWW03F9", // Daniel: deep, authoritative British
+  historical: "JBFqnCBsd6RMkjVDRZzb", // George: warm British storyteller
 } as const;
 
 export type VoiceName = keyof typeof VOICES;
@@ -23,12 +28,13 @@ export interface VoiceSettings {
   use_speaker_boost?: boolean;
 }
 
-// Clear, steady settings for factual narration (maths). Higher stability and no
-// style exaggeration means fewer mispronunciations and a calmer, accurate read.
+// Clear but natural settings for factual narration (maths). The old values
+// (stability 0.7, style 0) produced a flat, robotic read; a little less
+// stability and a touch of style lets the voice breathe while staying accurate.
 export const CLEAR_VOICE: VoiceSettings = {
-  stability: 0.7,
-  similarity_boost: 0.85,
-  style: 0,
+  stability: 0.55,
+  similarity_boost: 0.8,
+  style: 0.2,
   use_speaker_boost: true,
 };
 
@@ -61,12 +67,35 @@ export async function speak(
   return audio;
 }
 
-/** Stop any current narration. */
+/** Stop any current narration (both ElevenLabs audio and the browser voice). */
 export function stop(): void {
   if (current) {
     current.pause();
     current = null;
   }
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
+/**
+ * Free fallback: read the text with the browser's built-in voice. No key, no
+ * credits, works offline. Used when ElevenLabs is unavailable (e.g. the
+ * character allowance has run out) so narration never just goes silent.
+ * Resolves when the speech finishes.
+ */
+export function speakWithBrowser(text: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!("speechSynthesis" in window)) {
+      reject(new Error("This browser has no built-in voice."));
+      return;
+    }
+    stop();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-GB";
+    utterance.rate = 0.95;
+    utterance.onend = () => resolve();
+    utterance.onerror = () => reject(new Error("The built-in voice failed."));
+    window.speechSynthesis.speak(utterance);
+  });
 }
 
 async function readError(res: Response): Promise<string> {

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { speak, stop, CLEAR_VOICE } from "@/shared/audio/elevenLabsClient";
+import {
+  speak,
+  speakWithBrowser,
+  stop,
+  CLEAR_VOICE,
+} from "@/shared/audio/elevenLabsClient";
 import { addXp } from "@/shared/progress/useProgress";
 import { FunctionGraph } from "./FunctionGraph";
 import { TOPICS, getTopic, type MathsTopic } from "./topics";
@@ -83,11 +88,24 @@ function MathsTopicView({ topic, onBack }: { topic: MathsTopic; onBack: () => vo
       // "Stop" state until the audio actually finishes (or is stopped).
       const audio = await speak(topic.explain, "narrator", CLEAR_VOICE);
       audio.addEventListener("ended", () => setNarrating(false), { once: true });
-    } catch {
-      setNarrating(false);
-      setAudioError(
-        "The narration could not play this time. You can carry on with the steps and try the audio again in a moment.",
-      );
+    } catch (e) {
+      // ElevenLabs unavailable (e.g. character allowance used up): fall back
+      // to the browser's free built-in voice so the lesson still speaks.
+      try {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("402")) {
+          setAudioError(
+            "The online narration allowance has run out, so this is the device's built-in voice for now.",
+          );
+        }
+        await speakWithBrowser(topic.explain);
+      } catch {
+        setAudioError(
+          "The narration could not play this time. You can carry on with the steps and try the audio again in a moment.",
+        );
+      } finally {
+        setNarrating(false);
+      }
     }
   }
 
