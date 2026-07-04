@@ -165,12 +165,13 @@ app.post("/api/audio/tts", async (req, res) => {
   if (!text || !voiceId)
     return res.status(400).json({ error: "Missing 'text' or 'voiceId'." });
 
-  // Expressive default (good for dramatic reading); callers can override, e.g.
-  // maths sends clearer, steadier settings for accurate narration.
+  // Expressive, natural default (good for dramatic reading); callers can
+  // override, e.g. maths sends slightly steadier settings for accuracy.
+  // Lower stability and a bit more style keeps the read lively, not robotic.
   const settings = voiceSettings ?? {
-    stability: 0.4,
-    similarity_boost: 0.85,
-    style: 0.3,
+    stability: 0.35,
+    similarity_boost: 0.8,
+    style: 0.4,
     use_speaker_boost: true,
   };
 

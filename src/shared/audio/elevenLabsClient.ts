@@ -28,12 +28,13 @@ export interface VoiceSettings {
   use_speaker_boost?: boolean;
 }
 
-// Clear, steady settings for factual narration (maths). Higher stability and no
-// style exaggeration means fewer mispronunciations and a calmer, accurate read.
+// Clear but natural settings for factual narration (maths). The old values
+// (stability 0.7, style 0) produced a flat, robotic read; a little less
+// stability and a touch of style lets the voice breathe while staying accurate.
 export const CLEAR_VOICE: VoiceSettings = {
-  stability: 0.7,
-  similarity_boost: 0.85,
-  style: 0,
+  stability: 0.55,
+  similarity_boost: 0.8,
+  style: 0.2,
   use_speaker_boost: true,
 };
 
