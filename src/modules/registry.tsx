@@ -31,7 +31,8 @@ export const modules: LearningModule[] = [
   {
     id: "english",
     title: "English",
-    description: "AQA GCSE Macbeth: close reading, audio, visuals and exam practice.",
+    description:
+      "AQA GCSE English: Macbeth and An Inspector Calls, with close reading, audio, visuals and exam practice.",
     glyph: "📖",
     accent: "#8a6d3b",
     component: lazy(() => import("./english/EnglishModule")),

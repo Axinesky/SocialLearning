@@ -78,12 +78,13 @@ function EnglishLesson({ lesson: T, onBack }: { lesson: GcseText; onBack: () => 
     setLoadingImage(true);
     try {
       setImage(await generateImage(T.scenePrompt));
-    } catch (e) {
-      const msg = errMessage(e);
-      if (isGeminiCreditIssue(msg)) {
-        setImage(fallbackSceneCard(T.scenePrompt));
-      }
-      setError(msg);
+    } catch {
+      // Whatever the image provider, fail softly: show the scene described in
+      // words so the pupil can keep going, and invite them to retry later.
+      setImage(fallbackSceneCard(T.scenePrompt));
+      setError(
+        "The picture could not be drawn this time. The scene is described in words below; you can try again in a moment.",
+      );
     } finally {
       setLoadingImage(false);
     }
@@ -278,30 +279,14 @@ function EnglishLesson({ lesson: T, onBack }: { lesson: GcseText; onBack: () => 
 
 function errMessage(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
-  if (isGeminiCreditIssue(msg)) {
-    return (
-      "Image generation is temporarily unavailable because Gemini credits are exhausted. " +
-      "A fallback scene card is shown below. Top up credits in Google AI Studio, then try again."
-    );
-  }
   return msg.includes("500") || msg.includes("key")
     ? "The AI service isn't configured yet. Add your API keys to .env and restart."
     : msg;
 }
 
-function isGeminiCreditIssue(msg: string): boolean {
-  const lower = msg.toLowerCase();
-  return (
-    lower.includes("429") &&
-    (lower.includes("prepayment credits are depleted") ||
-      lower.includes("resource_exhausted") ||
-      lower.includes("gemini image request failed"))
-  );
-}
-
 function fallbackSceneCard(scenePrompt: string): string {
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="640" viewBox="0 0 1024 640" role="img" aria-label="Scene prompt fallback card">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="640" viewBox="0 0 1024 640" role="img" aria-label="Scene described in words">
       <defs>
         <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#1f2a44" />
@@ -311,13 +296,13 @@ function fallbackSceneCard(scenePrompt: string): string {
       <rect width="1024" height="640" fill="url(#bg)" />
       <rect x="48" y="48" width="928" height="544" rx="20" fill="#ffffff" fill-opacity="0.1" stroke="#f6d46b" stroke-width="3" />
       <text x="80" y="130" fill="#f6d46b" font-family="Nunito, sans-serif" font-size="40" font-weight="700">
-        Scene visualisation paused
+        Picture this scene yourself
       </text>
       <text x="80" y="190" fill="#f3f6ff" font-family="Nunito, sans-serif" font-size="28">
-        Gemini credits are currently exhausted.
+        The image service is unavailable right now.
       </text>
       <text x="80" y="250" fill="#f3f6ff" font-family="Nunito, sans-serif" font-size="26">
-        Keep analysing the extract with this prompt:
+        Close your eyes and imagine this:
       </text>
       <foreignObject x="80" y="286" width="860" height="250">
         <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Nunito, sans-serif; color: #ffffff; font-size: 24px; line-height: 1.4;">

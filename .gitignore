@@ -8,3 +8,6 @@ dist-ssr
 .DS_Store
 *.log
 .vite
+
+# Guard against the repo being cloned inside itself again
+leafhacks/
