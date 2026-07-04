@@ -7,6 +7,8 @@
 
 .buddy__text {
   position: relative;
+  /* Leave headroom above the first line so the perched buddy is never clipped. */
+  padding-top: var(--space-8);
 }
 
 /* Each word is inline-block so it can pop and so the buddy can be measured. */
@@ -44,13 +46,13 @@
  */
 .buddy__sprite {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   background: #da7756;
   border: 3px solid var(--ink);
-  border-radius: 5px;
-  transition: left 0.22s cubic-bezier(0.5, -0.4, 0.5, 1.4), top 0.22s ease;
-  animation: bob 0.5s ease-in-out infinite;
+  border-radius: 6px;
+  transition: left 0.26s cubic-bezier(0.5, -0.4, 0.5, 1.4), top 0.26s ease;
+  animation: bob 0.6s ease-in-out infinite;
   z-index: 2;
   pointer-events: none;
 }
@@ -58,16 +60,16 @@
 .buddy__sprite::after {
   content: "";
   position: absolute;
-  top: 7px;
-  width: 5px;
-  height: 5px;
+  top: 9px;
+  width: 6px;
+  height: 6px;
   background: var(--ink);
 }
 .buddy__sprite::before {
-  left: 4px;
+  left: 5px;
 }
 .buddy__sprite::after {
-  right: 4px;
+  right: 5px;
 }
 /* The bob keeps the buddy anchored just above its word while it hops. */
 @keyframes bob {

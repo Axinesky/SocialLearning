@@ -1,3 +1,44 @@
+.english__back {
+  margin-bottom: var(--space-4);
+}
+
+/* Lesson picker */
+.english__lessons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+.english__lessoncard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+  border-top: 6px solid var(--accent);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.english__lessoncard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.english__lessontheme {
+  font-size: 0.55rem;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+}
+.english__lessonplay {
+  margin: var(--space-2) 0 0;
+}
+.english__lessonmeta {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .english__head {
   margin-bottom: var(--space-6);
 }

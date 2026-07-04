@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { modules } from "@/modules/registry";
 import { useProgress, levelFromXp } from "@/shared/progress/useProgress";
 import { getQuote, randomLocalQuote, type Quote } from "@/shared/quotes/quotes";
+import { ReadingBuddy } from "@/shared/buddy/ReadingBuddy";
 import "./home.css";
 
 export function Home() {
@@ -23,9 +24,12 @@ export function Home() {
         <h1>Ready when you are</h1>
       </header>
 
-      {/* A calm, encouraging quote instead of a wall of text */}
+      {/* A calm, encouraging quote instead of a wall of text, with the buddy
+          perched on it as a friendly, always-present mascot. */}
       <figure className="home__quote panel">
-        <blockquote>“{quote.text}”</blockquote>
+        <blockquote className="home__quoteblock">
+          <ReadingBuddy key={quote.text} text={`“${quote.text}”`} controls={false} />
+        </blockquote>
         <figcaption>{quote.author}</figcaption>
         <button
           type="button"

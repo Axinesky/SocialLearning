@@ -21,6 +21,9 @@ const ELEVEN_MODEL = process.env.ELEVENLABS_MODEL ?? "eleven_multilingual_v2";
 // Models: override via env if you want a different one.
 const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL ?? "gemini-2.5-flash";
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL ?? "gemini-2.5-flash-image";
+// Image provider. Default "pollinations" is free and needs no key. Set
+// IMAGE_PROVIDER=gemini to use Gemini instead (needs credits).
+const IMAGE_PROVIDER = process.env.IMAGE_PROVIDER ?? "pollinations";
 
 function requireKey(res: express.Response, key: string | undefined, name: string) {
   if (!key) {
@@ -79,10 +82,32 @@ app.post("/api/ai/text", async (req, res) => {
 
 /** Image generation: returns a data URL ready for <img src>. */
 app.post("/api/ai/image", async (req, res) => {
-  if (!requireKey(res, GEMINI_KEY, "GEMINI_API_KEY")) return;
   const { prompt } = req.body as { prompt?: string };
   if (!prompt) return res.status(400).json({ error: "Missing 'prompt'." });
 
+  // Free default: Pollinations needs no key. Set IMAGE_PROVIDER=gemini for Gemini.
+  if (IMAGE_PROVIDER !== "gemini") {
+    try {
+      // flux = best free model; enhance=true expands the prompt with an LLM for
+      // much better detail; larger size renders more cleanly.
+      const url =
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}` +
+        `?width=1024&height=576&nologo=true&enhance=true&model=flux`;
+      const r = await fetch(url);
+      if (!r.ok) {
+        return res
+          .status(502)
+          .json({ error: "Image generation failed.", details: await readErrorBody(r) });
+      }
+      const buf = Buffer.from(await r.arrayBuffer());
+      return res.json({ dataUrl: `data:image/jpeg;base64,${buf.toString("base64")}` });
+    } catch (e) {
+      return res.status(500).json({ error: String(e) });
+    }
+  }
+
+  // Gemini path (opt-in, needs credits).
+  if (!requireKey(res, GEMINI_KEY, "GEMINI_API_KEY")) return;
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${GEMINI_KEY}`,
@@ -143,6 +168,14 @@ app.post("/api/audio/tts", async (req, res) => {
         body: JSON.stringify({
           text,
           model_id: ELEVEN_MODEL,
+          // Lower stability + speaker boost gives a warmer, more natural, less
+          // robotic delivery. Tune these to taste per voice.
+          voice_settings: {
+            stability: 0.4,
+            similarity_boost: 0.85,
+            style: 0.3,
+            use_speaker_boost: true,
+          },
         }),
       },
     );

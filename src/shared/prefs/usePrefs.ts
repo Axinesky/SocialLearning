@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
  * component changes. Persisted to localStorage and applied before first paint.
  */
 
-export type Theme = "meadow" | "dusk" | "ocean" | "mono";
+export type Theme = "sky" | "meadow" | "dusk" | "ocean" | "mono";
 export type TextSize = "small" | "medium" | "large";
 export type Aesthetic = "pixel" | "plain";
 
@@ -22,7 +22,7 @@ export interface Prefs {
 }
 
 export const DEFAULT_PREFS: Prefs = {
-  theme: "meadow",
+  theme: "sky",
   textSize: "medium",
   aesthetic: "pixel",
   reduceMotion: false,

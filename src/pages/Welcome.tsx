@@ -17,6 +17,7 @@ import "./welcome.css";
  */
 
 const THEMES: { id: Theme; label: string; swatch: string }[] = [
+  { id: "sky", label: "Sky", swatch: "#4a92da" },
   { id: "meadow", label: "Meadow", swatch: "#4f9d69" },
   { id: "dusk", label: "Dusk", swatch: "#6f5bd0" },
   { id: "ocean", label: "Ocean", swatch: "#2f86b5" },

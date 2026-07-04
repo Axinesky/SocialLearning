@@ -1,28 +1,28 @@
 /*
- * Design tokens: Cosy Pixel RPG.
+ * Design tokens: Calm Pixel.
  *
- * A warm, chunky game-UI look (think cosy farming/adventure games): thick ink
- * outlines, hard offset shadows (no soft blur), a parchment palette, pixel font
- * for headings/HUD only. Deliberately cosy, NOT flashy arcade, as our learners
- * have ADHD / social anxiety, so it should feel rewarding and calm, not loud.
+ * A soft, chunky game-UI look with thick ink outlines and hard offset shadows
+ * (no soft blur), built on a gentle baby-blue palette with a pixel font for
+ * headings/HUD only. Baby blue is deliberately calming, which suits our
+ * learners with ADHD / social anxiety: rewarding and soothing, never loud.
  *
  * Rules: pixel font is for short UI text and headings only. Body + reading text
  * stays in a rounded readable font. Change tokens here, not in components.
  */
 
 :root {
-  /* Parchment palette: warm, cosy, low-glare */
-  --bg: #f4e9d0;          /* aged paper */
-  --surface: #fbf3df;     /* panel face */
-  --surface-2: #ede0c2;   /* sunken panel */
-  --ink: #3a2b21;         /* dark outline + text (near-black brown) */
-  --text: #3a2b21;
-  --text-muted: #7a6551;
+  /* Baby-blue palette: soft, calm, low-glare */
+  --bg: #e8f2fc;          /* soft sky */
+  --surface: #f8fcff;     /* panel face, near white */
+  --surface-2: #d7e8f8;   /* sunken panel */
+  --ink: #21384d;         /* dark outline + text (deep slate blue) */
+  --text: #21384d;
+  --text-muted: #5c7488;
 
-  /* Cosy game accents, each module overrides --accent locally.
+  /* Game accents, each module overrides --accent locally.
      Soft tints are derived with color-mix so colour themes only need to set
      --accent and --gold, and the tints stay correct in light and dark. */
-  --accent: #4f9d69;        /* grass green (Meadow, the default theme) */
+  --accent: #4a92da;        /* sky blue (Sky, the default theme) */
   --accent-soft: color-mix(in srgb, var(--accent) 22%, var(--surface));
   --accent-contrast: #ffffff;
   --gold: #e8b53f;          /* XP / coins / rewards */
@@ -55,23 +55,23 @@
   --line-reading: 1.75;
 }
 
-/* Dark theme: cosy "night / cave" version, still warm not black */
+/* Dark theme: calm night version, deep blue not black */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #2a2320;
-    --surface: #362c27;
-    --surface-2: #241d1a;
-    --ink: #12100e;
-    --text: #f4e9d0;
-    --text-muted: #b8a48d;
-    --accent: #6fbf85;
-    --accent-contrast: #12100e;
+    --bg: #16222e;
+    --surface: #1f2e3c;
+    --surface-2: #142029;
+    --ink: #0b1219;
+    --text: #e6eff8;
+    --text-muted: #92a6b8;
+    --accent: #6fb0e6;
+    --accent-contrast: #0b1219;
     --gold: #f0c357;
     --berry: #e07d8b;
     --focus-ring: #7ca6ee;
     /* Hard shadow needs a darker ink so it reads on dark surfaces */
-    --shadow-hard: 4px 4px 0 #12100e;
-    --shadow-hard-sm: 2px 2px 0 #12100e;
+    --shadow-hard: 4px 4px 0 #0b1219;
+    --shadow-hard-sm: 2px 2px 0 #0b1219;
   }
 }
 
@@ -85,13 +85,15 @@
 }
 
 /* Colour themes (data-theme). Only accent + gold are set; soft tints derive. */
+:root[data-theme="sky"]    { --accent: #4a92da; --gold: #e8b53f; }
 :root[data-theme="meadow"] { --accent: #4f9d69; --gold: #e8b53f; }
 :root[data-theme="dusk"]   { --accent: #6f5bd0; --gold: #d9a441; }
 :root[data-theme="ocean"]  { --accent: #2f86b5; --gold: #e8b53f; }
 :root[data-theme="mono"]   { --accent: #6f6a60; --gold: #a49a88; }
 
-/* Brighter accents so the themes stay legible on the dark parchment. */
+/* Brighter accents so the themes stay legible on the dark background. */
 @media (prefers-color-scheme: dark) {
+  :root[data-theme="sky"]    { --accent: #6fb0e6; }
   :root[data-theme="meadow"] { --accent: #6fbf85; }
   :root[data-theme="dusk"]   { --accent: #9a8ae6; }
   :root[data-theme="ocean"]  { --accent: #5fb0dc; }

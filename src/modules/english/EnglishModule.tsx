@@ -1,41 +1,71 @@
 import { useState } from "react";
-import { speak, stop } from "@/shared/audio/elevenLabsClient";
 import { generateImage, generateText } from "@/shared/ai/geminiClient";
 import { Quest, type Stage } from "@/shared/quest/Quest";
 import { ReadingBuddy } from "@/shared/buddy/ReadingBuddy";
-import { MACBETH as T, EXAMINER_SYSTEM } from "./content";
+import { LESSONS, getLesson, EXAMINER_SYSTEM, type GcseText } from "./content";
 import "./english.css";
 
 /*
  * English module: YOUR module.
  *
- * AQA GCSE English Literature (Macbeth), delivered as a quest of short stages
- * rather than one long page. Showing one focused thing at a time is the
- * ADHD-friendly heart of this: read and listen, spot the themes, learn the
- * context, then write and get marked. Content lives in content.ts.
+ * AQA GCSE English Literature. Pupils pick a lesson (Macbeth themes and An
+ * Inspector Calls), then work through it as a quest of short stages rather than
+ * one long page: read and listen, spot the themes, learn the context, then
+ * write and get marked. Lesson content lives in content.ts.
  */
 
 export function EnglishModule() {
-  // Shared state, used across the stages below.
-  const [narrating, setNarrating] = useState(false);
+  const [lessonId, setLessonId] = useState<string | null>(null);
+  const lesson = getLesson(lessonId ?? undefined);
+
+  if (!lesson) return <LessonPicker onPick={setLessonId} />;
+
+  // key resets a lesson's state (image, answer, feedback) when you switch lesson.
+  return (
+    <EnglishLesson
+      key={lesson.id}
+      lesson={lesson}
+      onBack={() => setLessonId(null)}
+    />
+  );
+}
+
+/** The grid of lessons a pupil can choose from. */
+function LessonPicker({ onPick }: { onPick: (id: string) => void }) {
+  return (
+    <article className="english">
+      <header className="english__head">
+        <p className="english__eyebrow pixel">▸ english quests</p>
+        <h1>Choose a lesson</h1>
+      </header>
+      <div className="english__lessons">
+        {LESSONS.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className="panel english__lessoncard"
+            onClick={() => onPick(l.id)}
+          >
+            <span className="english__lessontheme pixel">{l.focusTheme}</span>
+            <h2 className="english__lessonplay">{l.play}</h2>
+            <p className="english__lessonmeta">
+              {l.board} · {l.paper}
+            </p>
+          </button>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+/** One lesson, delivered as a quest of focused stages. */
+function EnglishLesson({ lesson: T, onBack }: { lesson: GcseText; onBack: () => void }) {
   const [image, setImage] = useState<string | null>(null);
   const [loadingImage, setLoadingImage] = useState(false);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [marking, setMarking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  async function narrate() {
-    setError(null);
-    try {
-      setNarrating(true);
-      await speak(T.extract, "historical");
-    } catch (e) {
-      setError(errMessage(e));
-    } finally {
-      setNarrating(false);
-    }
-  }
 
   async function visualise() {
     setError(null);
@@ -88,15 +118,8 @@ export function EnglishModule() {
           </p>
           <section className="panel english__passage" aria-label="Extract">
             <p className="english__speaker">{T.speaker}</p>
-            <ReadingBuddy text={T.extract} />
+            <ReadingBuddy text={T.extract} voice="historical" />
             <div className="english__actions">
-              <button
-                type="button"
-                className="btn"
-                onClick={narrating ? stop : narrate}
-              >
-                {narrating ? "⏹ Stop" : "🔊 Read aloud"}
-              </button>
               <button
                 type="button"
                 className="btn btn--ghost"
@@ -129,8 +152,8 @@ export function EnglishModule() {
       render: () => (
         <>
           <p className="english__instruction">
-            These are the big ideas Shakespeare explores. Keep them in mind as
-            you read, they are what your answer should track.
+            These are the big ideas the writer explores. Keep them in mind as you
+            read, they are what your answer should track.
           </p>
           <div className="english__chips">
             {T.themes.map((theme) => (
@@ -197,7 +220,7 @@ export function EnglishModule() {
             className="english__textarea"
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder="In this extract, Shakespeare presents Macbeth's ambition through…"
+            placeholder={`In this extract, ${T.play} presents ${T.focusTheme.toLowerCase()} through…`}
             rows={6}
           />
           <button
@@ -227,6 +250,9 @@ export function EnglishModule() {
 
   return (
     <article className="english">
+      <button type="button" className="btn btn--ghost english__back" onClick={onBack}>
+        ← All lessons
+      </button>
       <header className="english__head">
         <p className="english__eyebrow pixel">▸ close reading quest</p>
         <h1>

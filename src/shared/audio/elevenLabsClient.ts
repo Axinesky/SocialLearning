@@ -11,19 +11,22 @@ export const VOICES = {
   narrator: "21m00Tcm4TlvDq8ikWAM", // calm default (Rachel)
   warm: "EXAVITQu4vr4xnSDxMaL", // softer, reassuring
   dramatic: "ErXwobaYiN019PkySvjV", // for literature read-alouds
-  historical: "onwK4e9ZLuTAKqWW03F9", // authoritative storyteller tone (Daniel)
+  historical: "JBFqnCBsd6RMkjVDRZzb", // deep, warm British storyteller (George)
 } as const;
 
 export type VoiceName = keyof typeof VOICES;
 
 let current: HTMLAudioElement | null = null;
 
-/** Speak `text` aloud. Cancels any previous playback so audio never overlaps. */
+/**
+ * Speak `text` aloud. Cancels any previous playback so audio never overlaps.
+ * Returns the audio element so callers can sync to it (e.g. the reading buddy).
+ */
 export async function speak(
   text: string,
   voice: VoiceName = "narrator",
   signal?: AbortSignal,
-): Promise<void> {
+): Promise<HTMLAudioElement> {
   stop();
   const res = await fetch(apiUrl("/api/audio/tts"), {
     method: "POST",
@@ -39,6 +42,7 @@ export async function speak(
   current = audio;
   audio.addEventListener("ended", () => URL.revokeObjectURL(url), { once: true });
   await audio.play();
+  return audio;
 }
 
 /** Stop any current narration. */
