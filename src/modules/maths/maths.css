@@ -1,0 +1,165 @@
+.maths__eyebrow {
+  color: var(--accent);
+  font-size: 0.6rem;
+  margin: 0 0 var(--space-4);
+}
+.maths__head {
+  margin-bottom: var(--space-6);
+}
+.maths__head h1 {
+  margin: 0;
+}
+.maths__back {
+  margin-bottom: var(--space-4);
+}
+
+/* Topic picker */
+.maths__topics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+.maths__topiccard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+  border-top: 6px solid var(--accent);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.maths__topiccard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.maths__topictag {
+  font-size: 0.55rem;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+}
+.maths__topicname {
+  margin: var(--space-2) 0 0;
+}
+
+/* Topic view */
+.maths__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.maths__step {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  margin: var(--space-2) 0 0;
+}
+.maths__text {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.maths__eq {
+  margin: 0;
+  font-family: var(--font-reading);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.maths__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.maths__dot {
+  width: 40px;
+  height: 40px;
+  border: var(--border-w) solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-hard-sm);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+}
+.maths__dot:hover {
+  background: var(--accent-soft);
+}
+.maths__dot:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.maths__dot.is-on {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+.maths__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* The inline SVG graph. Colours come from tokens so it fits every theme. */
+.mgraph {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--surface-2);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+}
+.mgraph__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.mgraph__axis {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+.mgraph__tick {
+  fill: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 11px;
+}
+.mgraph__curve {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mgraph__point {
+  fill: var(--berry);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+/* Each revealed point pops in. Reduced motion zeroes this via the global rule. */
+.mgraph__marker {
+  animation: mpop 0.4s ease both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes mpop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.mgraph__label {
+  fill: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+}
