@@ -104,6 +104,16 @@
   margin-top: var(--space-2);
 }
 
+.maths__error {
+  color: #fff;
+  background: var(--berry);
+  border: var(--border-w) solid var(--ink);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard-sm);
+  margin: var(--space-2) 0 0;
+}
+
 /* The inline SVG graph. Colours come from tokens so it fits every theme. */
 .mgraph {
   width: 100%;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { speak, stop, CLEAR_VOICE } from "@/shared/audio/elevenLabsClient";
 import { addXp } from "@/shared/progress/useProgress";
 import { FunctionGraph } from "./FunctionGraph";
@@ -54,7 +54,11 @@ function TopicPicker({ onPick }: { onPick: (id: string) => void }) {
 function MathsTopicView({ topic, onBack }: { topic: MathsTopic; onBack: () => void }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [narrating, setNarrating] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [awarded, setAwarded] = useState(false);
+
+  // Never leave narration playing after the pupil moves elsewhere.
+  useEffect(() => () => stop(), []);
 
   const step = topic.steps[stepIndex];
   const last = topic.steps.length - 1;
@@ -72,14 +76,24 @@ function MathsTopicView({ topic, onBack }: { topic: MathsTopic; onBack: () => vo
   }
 
   async function explain() {
+    setAudioError(null);
     setNarrating(true);
     try {
-      await speak(topic.explain, "narrator", CLEAR_VOICE);
+      // speak() resolves once playback STARTS, so keep the button in its
+      // "Stop" state until the audio actually finishes (or is stopped).
+      const audio = await speak(topic.explain, "narrator", CLEAR_VOICE);
+      audio.addEventListener("ended", () => setNarrating(false), { once: true });
     } catch {
-      // Audio is optional; ignore if it is unavailable.
-    } finally {
       setNarrating(false);
+      setAudioError(
+        "The narration could not play this time. You can carry on with the steps and try the audio again in a moment.",
+      );
     }
+  }
+
+  function stopNarration() {
+    stop();
+    setNarrating(false);
   }
 
   return (
@@ -130,7 +144,11 @@ function MathsTopicView({ topic, onBack }: { topic: MathsTopic; onBack: () => vo
         </div>
 
         <div className="maths__actions">
-          <button type="button" className="btn" onClick={narrating ? stop : explain}>
+          <button
+            type="button"
+            className="btn"
+            onClick={narrating ? stopNarration : explain}
+          >
             {narrating ? "⏹ Stop" : "🔊 Explain"}
           </button>
           <button
@@ -150,6 +168,12 @@ function MathsTopicView({ topic, onBack }: { topic: MathsTopic; onBack: () => vo
             Next →
           </button>
         </div>
+
+        {audioError && (
+          <p role="alert" className="maths__error">
+            {audioError}
+          </p>
+        )}
       </div>
     </article>
   );

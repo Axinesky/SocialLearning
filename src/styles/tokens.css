@@ -44,6 +44,9 @@
   --radius: 6px;
   --radius-lg: 8px;
   --border-w: 3px;
+  /* Subtle line colour for grid lines and dividers. Derived from text over
+     surface so it adapts to light, dark and every colour theme. */
+  --border: color-mix(in srgb, var(--text) 22%, var(--surface));
   --shadow-hard: 4px 4px 0 var(--ink);
   --shadow-hard-sm: 2px 2px 0 var(--ink);
 

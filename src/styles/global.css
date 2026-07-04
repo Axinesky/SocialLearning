@@ -140,6 +140,14 @@ a {
   color: var(--text);
   font-weight: 700;
 }
+/* In dark mode --ink is near-black, so ghost buttons (Back, All lessons, All
+   topics) lose their outline against dark panels and become invisible. Use a
+   lighter border there so they always read as buttons. */
+@media (prefers-color-scheme: dark) {
+  .btn--ghost {
+    border-color: var(--text-muted);
+  }
+}
 .btn--gold {
   background: var(--gold);
   color: var(--ink);

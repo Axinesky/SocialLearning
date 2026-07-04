@@ -1,3 +1,5 @@
+import { apiUrl } from "@/shared/api/apiUrl";
+
 /*
  * Motivational and educational quotes for the homepage.
  *
@@ -31,7 +33,7 @@ export function randomLocalQuote(): Quote {
 /** Fetch a fresh quote via the proxy, falling back to a local one on any error. */
 export async function getQuote(signal?: AbortSignal): Promise<Quote> {
   try {
-    const res = await fetch("/api/quote", { signal });
+    const res = await fetch(apiUrl("/api/quote"), { signal });
     if (!res.ok) throw new Error(String(res.status));
     const data = (await res.json()) as Quote;
     if (data?.text) return data;

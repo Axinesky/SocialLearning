@@ -93,7 +93,8 @@ app.post("/api/ai/image", async (req, res) => {
       const url =
         `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}` +
         `?width=1024&height=576&nologo=true&enhance=true&model=flux`;
-      const r = await fetch(url);
+      // Image generation can be slow; cap it so the pupil never waits forever.
+      const r = await fetch(url, { signal: AbortSignal.timeout(60_000) });
       if (!r.ok) {
         return res
           .status(502)
