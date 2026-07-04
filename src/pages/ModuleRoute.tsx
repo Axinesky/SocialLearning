@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getModule } from "@/modules/registry";
+import { getModule, moduleAccentStyle } from "@/modules/registry";
 
 /** Resolves /learn/:id to the registered module and renders it. */
 export function ModuleRoute() {
@@ -20,7 +20,7 @@ export function ModuleRoute() {
 
   const Component = module.component;
   return (
-    <div style={{ ["--accent" as string]: module.accent }}>
+    <div style={moduleAccentStyle(module)}>
       <Suspense fallback={<p>Loading {module.title}…</p>}>
         <Component />
       </Suspense>

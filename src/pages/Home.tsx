@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { modules } from "@/modules/registry";
+import { modules, moduleAccentStyle } from "@/modules/registry";
 import { useProgress, levelFromXp } from "@/shared/progress/useProgress";
 import { getQuote, randomLocalQuote, type Quote } from "@/shared/quotes/quotes";
 import { ReadingBuddy } from "@/shared/buddy/ReadingBuddy";
@@ -55,7 +55,7 @@ export function Home() {
               key={m.id}
               to={`/learn/${m.id}`}
               className="panel home__questcard"
-              style={{ ["--accent" as string]: m.accent }}
+              style={moduleAccentStyle(m)}
             >
               <div className="home__questtop">
                 <span className="home__glyph" aria-hidden="true">

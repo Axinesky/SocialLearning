@@ -11,6 +11,9 @@
  */
 
 :root {
+  /* Let light-dark() resolve module accent colours per colour scheme. */
+  color-scheme: light dark;
+
   /* Baby-blue palette: soft, calm, low-glare */
   --bg: #e8f2fc;          /* soft sky */
   --surface: #f8fcff;     /* panel face, near white */
