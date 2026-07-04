@@ -175,6 +175,15 @@ app.post("/api/audio/tts", async (req, res) => {
     use_speaker_boost: true,
   };
 
+  // Lesson narration is fixed text, so cache generated audio. Replaying an
+  // extract or explanation then costs zero ElevenLabs credits.
+  const cacheKey = `${voiceId}|${ELEVEN_MODEL}|${JSON.stringify(settings)}|${text}`;
+  const cached = ttsCache.get(cacheKey);
+  if (cached) {
+    res.setHeader("Content-Type", "audio/mpeg");
+    return res.send(cached);
+  }
+
   const requestTts = (voice: string) =>
     fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
       method: "POST",
@@ -202,17 +211,35 @@ app.post("/api/audio/tts", async (req, res) => {
       r = await requestTts(ELEVEN_FALLBACK_VOICE);
     }
     if (!r.ok) {
+      const details = await readErrorBody(r);
+      // 402 means the account's character allowance has run out.
+      const guidance =
+        r.status === 402
+          ? "The ElevenLabs character allowance has run out. Top up or upgrade at elevenlabs.io, or set ELEVENLABS_MODEL=eleven_flash_v2_5 in .env to halve credit usage."
+          : undefined;
       return res
         .status(r.status)
-        .json({ error: "ElevenLabs request failed.", details: await readErrorBody(r) });
+        .json({ error: "ElevenLabs request failed.", details, ...(guidance ? { guidance } : {}) });
     }
     const buf = Buffer.from(await r.arrayBuffer());
+    rememberTts(cacheKey, buf);
     res.setHeader("Content-Type", "audio/mpeg");
     res.send(buf);
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
 });
+
+// Small in-memory audio cache (newest ~40 clips). Lesson text is static, so
+// this saves real money: each replay would otherwise bill the same characters.
+const ttsCache = new Map<string, Buffer>();
+function rememberTts(key: string, buf: Buffer) {
+  if (ttsCache.size >= 40) {
+    const oldest = ttsCache.keys().next().value;
+    if (oldest) ttsCache.delete(oldest);
+  }
+  ttsCache.set(key, buf);
+}
 
 /*
  * A fresh educational / motivational quote. No key needed. The frontend already

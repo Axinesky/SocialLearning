@@ -67,12 +67,35 @@ export async function speak(
   return audio;
 }
 
-/** Stop any current narration. */
+/** Stop any current narration (both ElevenLabs audio and the browser voice). */
 export function stop(): void {
   if (current) {
     current.pause();
     current = null;
   }
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
+/**
+ * Free fallback: read the text with the browser's built-in voice. No key, no
+ * credits, works offline. Used when ElevenLabs is unavailable (e.g. the
+ * character allowance has run out) so narration never just goes silent.
+ * Resolves when the speech finishes.
+ */
+export function speakWithBrowser(text: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!("speechSynthesis" in window)) {
+      reject(new Error("This browser has no built-in voice."));
+      return;
+    }
+    stop();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-GB";
+    utterance.rate = 0.95;
+    utterance.onend = () => resolve();
+    utterance.onerror = () => reject(new Error("The built-in voice failed."));
+    window.speechSynthesis.speak(utterance);
+  });
 }
 
 async function readError(res: Response): Promise<string> {
