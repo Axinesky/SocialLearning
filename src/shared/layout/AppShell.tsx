@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { modules } from "@/modules/registry";
+import { modules, moduleAccentStyle } from "@/modules/registry";
 import { useProgress, levelFromXp } from "@/shared/progress/useProgress";
 import "./app-shell.css";
 
@@ -57,7 +57,7 @@ export function AppShell() {
                 key={m.id}
                 to={`/learn/${m.id}`}
                 className="shell__link"
-                style={{ ["--accent" as string]: m.accent }}
+                style={moduleAccentStyle(m)}
               >
                 <span className="shell__glyph" aria-hidden="true">
                   {m.glyph}
