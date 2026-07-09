@@ -96,3 +96,27 @@
   margin: 0 0 var(--space-4);
   color: var(--text-muted);
 }
+
+/* Credits, tucked into the bottom-left corner of the page */
+.home__credits {
+  margin-top: auto;
+  align-self: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.home__creditslabel {
+  font-weight: 600;
+}
+.home__credits a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.home__credits a:hover {
+  color: var(--text);
+}

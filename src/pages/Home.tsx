@@ -72,6 +72,16 @@ export function Home() {
           );
         })}
       </section>
+
+      <footer className="home__credits">
+        <span className="home__creditslabel">made by:</span>
+        <a href="https://github.com/Axinesky" target="_blank" rel="noreferrer">
+          Axs
+        </a>
+        <a href="https://github.com/Y4FAJ" target="_blank" rel="noreferrer">
+          Y4FAJ
+        </a>
+      </footer>
     </div>
   );
 }
