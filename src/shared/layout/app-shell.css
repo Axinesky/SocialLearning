@@ -119,6 +119,28 @@
   margin-top: var(--space-2);
 }
 
+/* Creator credits, tucked under the settings button */
+.shell__credits {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.shell__creditslabel {
+  font-weight: 600;
+}
+.shell__credits a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shell__credits a:hover {
+  color: var(--text);
+}
+
 .shell__main {
   max-width: 880px;
   width: 100%;

@@ -72,6 +72,16 @@ export function AppShell() {
         <NavLink to="/welcome" className="btn btn--ghost shell__a11y">
           ⚙ Settings
         </NavLink>
+
+        <footer className="shell__credits">
+          <span className="shell__creditslabel">made by:</span>
+          <a href="https://github.com/Axinesky" target="_blank" rel="noreferrer">
+            Axs
+          </a>
+          <a href="https://github.com/Y4FAJ" target="_blank" rel="noreferrer">
+            Y4FAJ
+          </a>
+        </footer>
       </aside>
 
       <main id="main" className="shell__main">
